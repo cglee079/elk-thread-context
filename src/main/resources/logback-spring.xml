@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty scope="context" name="application-name" source="spring.application.name"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <logger name="ELK_LOGGER" additivity="false" level="INFO">
+        <appender-ref ref="CONSOLE_JSON"/>
+        <appender-ref ref="LOG_STASH"/>
+    </logger>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"index":"${application-name}"}</customFields>
+        </encoder>
+    </appender>
+
+    <appender name="LOG_STASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>192.168.50.20:30500</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"index":"${application-name}"}</customFields>
+        </encoder>
+    </appender>
+
+</configuration>
+

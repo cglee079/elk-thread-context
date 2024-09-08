@@ -1,0 +1,5 @@
+spring:
+  application.name: hello-elk-thread
+
+sentry:
+  dsn : https://a9f94116bddc2316771d9b98438ec02f@o503520.ingest.us.sentry.io/4507916353273856
