@@ -26,7 +26,7 @@
     </appender>
 
     <appender name="LOG_STASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>192.168.50.20:30500</destination>
+        <destination>logstash:5044</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"index":"${application-name}"}</customFields>
         </encoder>
