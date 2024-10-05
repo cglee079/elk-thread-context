@@ -1,4 +1,4 @@
-package org.cglee079.hello.elkthread.config.filter
+package org.cglee079.hello.elkthread.web.config.filter
 
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest

@@ -1,4 +1,4 @@
-package org.cglee079.hello.elkthread.controller
+package org.cglee079.hello.elkthread.web.controller
 
 import io.sentry.Sentry
 import org.slf4j.LoggerFactory
