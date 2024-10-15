@@ -1,8 +1,10 @@
 package org.cglee079.hello.elkthread.logger
 
 data class RequestLog(
+    val requestId: String,
     val request: Request,
     val response: Response,
+    val metadata: Map<String, Any>
 ) {
 
     data class Request(

@@ -1,16 +1,21 @@
 package org.cglee079.hello.elkthread.web.config.filter
 
+import io.sentry.Sentry
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.cglee079.hello.elkthread.logger.ElkLogger
+import org.cglee079.hello.elkthread.logger.MDCHelper
 import org.cglee079.hello.elkthread.logger.RequestLog
+import org.cglee079.hello.elkthread.values.constant.SentryExtra
+import org.cglee079.hello.elkthread.values.constant.SentryTag
 import org.cglee079.hello.elkthread.util.toISO
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.util.ContentCachingRequestWrapper
 import org.springframework.web.util.ContentCachingResponseWrapper
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.MILLIS
+import java.util.UUID
 
 class RequestLoggingFilter : OncePerRequestFilter() {
 
@@ -19,6 +24,12 @@ class RequestLoggingFilter : OncePerRequestFilter() {
         servletResponse: HttpServletResponse,
         filterChain: FilterChain
     ) {
+
+        val requestId = UUID.randomUUID().toString()
+        MDCHelper.init(requestId)
+        Sentry.setTag(SentryTag.REQUEST_ID, requestId)
+        Sentry.setExtra(SentryExtra.KIBANA_URL, createKibanaUrl(requestId))
+
         val request = ContentCachingRequestWrapper(servletRequest)
         val response = ContentCachingResponseWrapper(servletResponse)
 
@@ -32,8 +43,10 @@ class RequestLoggingFilter : OncePerRequestFilter() {
             ElkLogger.info(
                 "Request Log",
                 RequestLog(
+                    requestId = requestId,
                     request = createRequestLog(request, requestAt),
-                    response = createResponseLog(response, requestAt, responseAt)
+                    response = createResponseLog(response, requestAt, responseAt),
+                    metadata = MDCHelper.getMetadata()
                 )
             )
 
@@ -56,7 +69,11 @@ class RequestLoggingFilter : OncePerRequestFilter() {
         )
     }
 
-    private fun createResponseLog(response: ContentCachingResponseWrapper, requestAt: LocalDateTime, responseAt: LocalDateTime): RequestLog.Response {
+    private fun createResponseLog(
+        response: ContentCachingResponseWrapper,
+        requestAt: LocalDateTime,
+        responseAt: LocalDateTime
+    ): RequestLog.Response {
         val headers = response.headerNames.toList()
             .associateWith { response.getHeaders(it).toList().toString() }
             .toMap()
@@ -70,4 +87,7 @@ class RequestLoggingFilter : OncePerRequestFilter() {
             responseAt = responseAt.toISO()
         )
     }
+
+    private fun createKibanaUrl(requestId: String): String =
+        "http://kibana.local/app/kibana#/discover?_g=(time:(from:now-7d)&_a=(index:'103c2e10-77da-11ef-a17a-07241150b3ca',query:(language:kqeury,query:'requestId:%22${requestId}%22'))"
 }
