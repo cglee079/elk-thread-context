@@ -26,9 +26,12 @@ class RequestLoggingFilter : OncePerRequestFilter() {
     ) {
 
         val requestId = UUID.randomUUID().toString()
-        MDCHelper.init(requestId)
+        val contextId = requestId
+
+        MDCHelper.init(requestId, contextId)
         Sentry.setTag(SentryTag.REQUEST_ID, requestId)
-        Sentry.setExtra(SentryExtra.KIBANA_URL, createKibanaUrl(requestId))
+        Sentry.setTag(SentryTag.CONTEXT_ID, contextId)
+        Sentry.setExtra(SentryExtra.KIBANA_URL, MDCHelper.createKibanaUrl(contextId))
 
         val request = ContentCachingRequestWrapper(servletRequest)
         val response = ContentCachingResponseWrapper(servletResponse)
@@ -44,6 +47,7 @@ class RequestLoggingFilter : OncePerRequestFilter() {
                 "Request Log",
                 RequestLog(
                     requestId = requestId,
+                    contextId = contextId,
                     request = createRequestLog(request, requestAt),
                     response = createResponseLog(response, requestAt, responseAt),
                     metadata = MDCHelper.getMetadata()
@@ -88,6 +92,4 @@ class RequestLoggingFilter : OncePerRequestFilter() {
         )
     }
 
-    private fun createKibanaUrl(requestId: String): String =
-        "http://kibana.local/app/kibana#/discover?_g=(time:(from:now-7d)&_a=(index:'103c2e10-77da-11ef-a17a-07241150b3ca',query:(language:kqeury,query:'requestId:%22${requestId}%22'))"
 }
