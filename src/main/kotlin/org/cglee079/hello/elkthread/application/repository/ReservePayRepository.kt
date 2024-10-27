@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Repository
-class ReserveJobRepository {
+class ReservePayRepository {
 
     fun findByBetweenAt(startAt: LocalDateTime, endAt: LocalDateTime): List<ResolvePay> =
         (0..1000L).map { ResolvePay(it, UUID.randomUUID().toString()) }
